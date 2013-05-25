@@ -33,20 +33,19 @@ void UUpdateWidget::slot_downloadFailed(const QString &error)
     QMessageBox::information(this, tr("HTTP"),
                              tr("Download failed: %1.")
                              .arg(error));
-    exit(0);
+    slot_closeWidget();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_downloadFinished(const QString &fileName, const QString &filePath)
 {
     if (!fileName.isEmpty() && !filePath.isEmpty()) {
-        slot_installUpdates();
+        Q_EMIT signal_installUpdates();
     } else {
         QMessageBox::information(this, tr("HTTP"),
                                  tr("Download failed"));
+        slot_closeWidget();
     }
-
-    exit(0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +56,7 @@ void UUpdateWidget::slot_redirectTo(const QUrl &redirectedUrl)
                               QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
         m_downloader->slot_redirectTo(redirectedUrl);
     } else {
-        exit(0);
+        slot_closeWidget();
     }
 }
 
@@ -67,7 +66,7 @@ void UUpdateWidget::slot_unableSaveFile(const QString &fileName, const QString &
     QMessageBox::information(this, tr("HTTP"),
                              tr("Unable to save the file %1: %2.")
                              .arg(fileName).arg(error));
-    exit(0);
+    slot_closeWidget();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +84,12 @@ void UUpdateWidget::slot_sslErrors(const QString &errors)
                              QMessageBox::Ignore | QMessageBox::Abort) == QMessageBox::Ignore) {
         m_downloader->slot_ignoreSslErrors();
     }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::slot_closeWidget()
+{
+    close();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,4 +128,5 @@ void UUpdateWidget::initConnections()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_installUpdates()
 {
+    slot_closeWidget();
 }

@@ -38,6 +38,7 @@ public slots:
     void slot_sslErrors(const QString &errors);
 #endif
 
+    void slot_closeWidget();
 private:
     Ui::UUpdateWidget   *m_ui;
     UDownloader         *m_downloader;

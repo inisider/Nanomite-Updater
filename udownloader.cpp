@@ -78,11 +78,8 @@ void UDownloader::slot_httpFinished()
         return;
     }
 
-    Q_EMIT signal_downloadFinished();
-
     m_file->flush();
     m_file->close();
-
 
     QVariant redirectionTarget = m_reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     if (m_reply->error()) {
