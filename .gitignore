@@ -11,3 +11,13 @@
 *.lai
 *.la
 *.a
+
+#qt based
+*.user
+Makefile
+
+.moc
+.rcc
+.ui
+.obj
+bin
