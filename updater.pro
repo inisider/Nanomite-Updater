@@ -5,18 +5,13 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT += network
 
 MOC_DIR = .moc
 RCC_DIR = .rcc
 UI_DIR = .ui
 OBJECTS_DIR = .obj
 DESTDIR = bin
-
-Release:DESTDIR = release
-Release:OBJECTS_DIR = release/.obj
-Release:MOC_DIR = release/.moc
-Release:RCC_DIR = release/.rcc
-Release:UI_DIR = release/.ui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,8 +20,11 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    udownloader.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    settings.h \
+    udownloader.h
 
 FORMS    += mainwindow.ui
