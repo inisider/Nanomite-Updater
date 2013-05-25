@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-#include "udownloader.h"
+#include "uupdatewidget.h"
 
 int main(int argc, char *argv[])
 {
@@ -9,9 +9,8 @@ int main(int argc, char *argv[])
 
 //    MainWindow w;
 //    w.show();
+    UUpdateWidget w;
+    w.show();
 
-    UDownloader downloader;
-    downloader.downloadUpdates();
-    
     return a.exec();
 }

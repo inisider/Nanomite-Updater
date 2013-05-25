@@ -20,6 +20,8 @@ public:
 
     void downloadUpdates();
 
+    void setUrl(QUrl url);
+
 private:
     void startRequest();
     
@@ -32,12 +34,12 @@ private:
     bool                    m_httpRequestAborted;
 
 signals:
-    void signal_unableSaveFile(QString fileName, QString error);
-    void signal_downloadFailed(QString error);
-    void signal_downloadFinished(QString fileName = "", QString filePath = "");
-    void signal_updateDataReadProgress(qint64 bytesRead, qint64 totalBytes);
-    void signal_sslErrors(QString errorString);
-    void signal_redirectTo(QUrl newUrl);
+    void signal_unableSaveFile(const QString &fileName, const QString &error);
+    void signal_downloadFailed(const QString &error);
+    void signal_downloadFinished(const QString &fileName = "", const QString &filePath = "");
+    void signal_updateDataReadProgress(const qint64 bytesRead, const qint64 totalBytes);
+    void signal_sslErrors(const QString &errorString);
+    void signal_redirectTo(const QUrl &newUrl);
     
 public slots:
     void slot_ignoreSslErrors();
