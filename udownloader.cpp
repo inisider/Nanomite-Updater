@@ -88,6 +88,7 @@ void UDownloader::slot_httpFinished()
         Q_EMIT signal_downloadFailed(m_reply->errorString());
     } else if (!redirectionTarget.isNull()) {
         Q_EMIT signal_redirectTo(m_url.resolved(redirectionTarget.toUrl()));
+        return;
     } else {
         QString fileName = QFileInfo(QUrl(QString(repository)).path()).fileName();
         Q_EMIT signal_downloadFinished(fileName, QDir::currentPath());
@@ -151,6 +152,17 @@ void UDownloader::slot_sslErrors(QNetworkReply *, const QList<QSslError> &errors
     Q_EMIT signal_sslErrors(errorString);
 }
 #endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UDownloader::slot_freeMemory()
+{
+    if (m_file) {
+        m_file->close();
+        m_file->remove();
+        delete m_file;
+        m_file = 0;
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UDownloader::slot_redirectTo(QUrl newUrl)

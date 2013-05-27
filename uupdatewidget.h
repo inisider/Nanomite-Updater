@@ -23,10 +23,10 @@ private:
     void initConnections();
 
 signals:
-    void signal_installUpdates();
+    void signal_installUpdates(const QString &fileName, const QString &filePath);
 
 public slots:
-    void slot_installUpdates();
+    void slot_installUpdates(const QString &fileName, const QString &filePath);
 
     void slot_downloadFailed(const QString &error);
     void slot_downloadFinished(const QString &fileName, const QString &filePath);

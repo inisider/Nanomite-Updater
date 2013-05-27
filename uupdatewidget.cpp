@@ -3,6 +3,9 @@
 
 #include "udownloader.h"
 
+#include <QDir>
+#include <QDebug>
+
 #include <QMessageBox>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +43,7 @@ void UUpdateWidget::slot_downloadFailed(const QString &error)
 void UUpdateWidget::slot_downloadFinished(const QString &fileName, const QString &filePath)
 {
     if (!fileName.isEmpty() && !filePath.isEmpty()) {
-        Q_EMIT signal_installUpdates();
+        Q_EMIT signal_installUpdates(fileName, filePath);
     } else {
         QMessageBox::information(this, tr("HTTP"),
                                  tr("Download failed"));
@@ -51,11 +54,14 @@ void UUpdateWidget::slot_downloadFinished(const QString &fileName, const QString
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_redirectTo(const QUrl &redirectedUrl)
 {
+    slot_updateDataReadProgress(0, 0);
+
     if (QMessageBox::question(this, tr("HTTP"),
                               tr("Redirect to %1 ?").arg(redirectedUrl.toString()),
                               QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
         m_downloader->slot_redirectTo(redirectedUrl);
     } else {
+        m_downloader->slot_freeMemory();
         slot_closeWidget();
     }
 }
@@ -119,14 +125,55 @@ void UUpdateWidget::initConnections()
 #endif
 
     // init connection for installing updates
-    connect(this,           SIGNAL(signal_installUpdates()),
-            this,           SLOT(slot_installUpdates()));
+    connect(this,           SIGNAL(signal_installUpdates(const QString &,const QString &)),
+            this,           SLOT(slot_installUpdates(const QString &,const QString &)));
 
     // init connection for ...
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UUpdateWidget::slot_installUpdates()
+void UUpdateWidget::slot_installUpdates(const QString &fileName, const QString &filePath)
 {
+    Q_UNUSED(fileName);
+    Q_UNUSED(filePath);
+////    QString destinationDir = filePath;
+////    QDir baseDir(destinationDir);
+
+//    QZipReader unzip(fileName, QIODevice::ReadOnly);
+//    unzip.extractAll(filePath);
+//    unzip.close();
+////    QList<QZipReader::FileInfo> allFiles = unzip.fileInfoList();
+////    QZipReader::FileInfo fi;
+
+////    foreach (QZipReader::FileInfo fi, allFiles)
+////    {
+////        const QString absPath = destinationDir + QDir::separator() + fi.filePath;
+////        if (fi.isDir)
+////        {
+////            if (!baseDir.mkpath(fi.filePath))
+////                 return;
+////            if (!QFile::setPermissions(absPath, fi.permissions))
+////                return;
+////        }
+////    }
+
+////    foreach (QZipReader::FileInfo fi, allFiles)
+////    {
+////        const QString absPath = destinationDir + QDir::separator() + fi.filePath;
+////        if (fi.isFile)
+////        {
+////            QFile file(absPath);
+////            if( file.open(QFile::WriteOnly) )
+////            {
+////                QApplication::setOverrideCursor(Qt::WaitCursor);
+////                file.write(unzip.fileData(fi.filePath), unzip.fileData(fi.filePath).size());
+////                file.setPermissions(fi.permissions);
+////                QApplication::restoreOverrideCursor();
+////                file.close();
+////            }
+////        }
+////    }
+////    unzip.close();
+
     slot_closeWidget();
 }

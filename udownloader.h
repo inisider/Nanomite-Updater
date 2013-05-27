@@ -46,6 +46,8 @@ public slots:
 
     void slot_redirectTo(QUrl newUrl);
 
+    void slot_freeMemory();
+
 private slots:
     void slot_httpFinished();
     void slot_httpReadyRead();
@@ -54,7 +56,6 @@ private slots:
 #ifndef QT_NO_OPENSSL
     void slot_sslErrors(QNetworkReply*,const QList<QSslError> &errors);
 #endif
-    
 };
 
 #endif // UDOWNLOADER_H
