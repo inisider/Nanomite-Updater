@@ -17,6 +17,7 @@ class UDownloader : public QObject
     Q_OBJECT
 public:
     explicit UDownloader(QObject *parent = 0);
+    ~UDownloader();
 
     void downloadUpdates();
 
@@ -45,8 +46,6 @@ public slots:
     void slot_ignoreSslErrors();
 
     void slot_redirectTo(QUrl newUrl);
-
-    void slot_freeMemory();
 
 private slots:
     void slot_httpFinished();

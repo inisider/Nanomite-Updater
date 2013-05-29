@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UDownloader::UDownloader(QObject *parent) :
-    QObject(parent), m_url(QString(repository))
+    QObject(parent), m_url(QString(repository)), m_file(0)
 {    
     connect(&m_qnam,    SIGNAL(authenticationRequired(QNetworkReply*,QAuthenticator*)),
             this,       SLOT(slot_authenticationRequired(QNetworkReply*,QAuthenticator*)));
@@ -14,6 +14,17 @@ UDownloader::UDownloader(QObject *parent) :
     connect(&m_qnam,    SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
             this,       SLOT(slot_sslErrors(QNetworkReply*,QList<QSslError>)));
 #endif
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+UDownloader::~UDownloader()
+{
+    if (m_file) {
+        m_file->close();
+        m_file->remove();
+        delete m_file;
+        m_file = 0;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +37,11 @@ void UDownloader::downloadUpdates()
 
     if (QFile::exists(fileName)) {
         QFile::remove(fileName);
+    }
+
+    if (m_file) {
+        delete m_file;
+        m_file = 0;
     }
 
     m_file = new QFile(fileName);
@@ -51,7 +67,9 @@ void UDownloader::setUrl(QUrl url)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UDownloader::startRequest()
 {
-    m_reply = m_qnam.get(QNetworkRequest(m_url));
+    m_reply = m_qnam.get(QNetworkRequest(m_url));    
+
+    qDebug() << m_reply->readAll().size();
 
     connect(m_reply,    SIGNAL(finished()),
             this,       SLOT(slot_httpFinished()));
@@ -152,17 +170,6 @@ void UDownloader::slot_sslErrors(QNetworkReply *, const QList<QSslError> &errors
     Q_EMIT signal_sslErrors(errorString);
 }
 #endif
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UDownloader::slot_freeMemory()
-{
-    if (m_file) {
-        m_file->close();
-        m_file->remove();
-        delete m_file;
-        m_file = 0;
-    }
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UDownloader::slot_redirectTo(QUrl newUrl)

@@ -61,7 +61,6 @@ void UUpdateWidget::slot_redirectTo(const QUrl &redirectedUrl)
                               QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
         m_downloader->slot_redirectTo(redirectedUrl);
     } else {
-        m_downloader->slot_freeMemory();
         slot_closeWidget();
     }
 }
