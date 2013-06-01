@@ -21,3 +21,7 @@ Makefile
 .ui
 .obj
 bin
+
+Makefile.Debug
+Makefile.Release
+vc100.pdb
