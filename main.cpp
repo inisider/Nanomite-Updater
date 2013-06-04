@@ -1,12 +1,12 @@
 #include <QApplication>
 
-#include "uupdatewidget.h"
+#include "uupdatewidget1.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    UUpdateWidget w;
+    UUpdateWidget1 w;
     w.show();
 
     return a.exec();

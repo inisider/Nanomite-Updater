@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UDownloader::UDownloader(QObject *parent) :
-    QObject(parent), m_url(QString(repository)), m_file(0)
+    QObject(parent), m_url(QString(""/*repository*/)), m_file(0)
 {    
     connect(&m_qnam,    SIGNAL(authenticationRequired(QNetworkReply*,QAuthenticator*)),
             this,       SLOT(slot_authenticationRequired(QNetworkReply*,QAuthenticator*)));
@@ -31,7 +31,7 @@ UDownloader::~UDownloader()
 void UDownloader::downloadUpdates()
 {
     QFileInfo fileInfo(m_url.path());
-    QString fileName = fileInfo.fileName();
+    QString fileName = fileInfo.fileName() + ".tmp";
     if (fileName.isEmpty())
         fileName = "name";
 
@@ -68,8 +68,6 @@ void UDownloader::setUrl(QUrl url)
 void UDownloader::startRequest()
 {
     m_reply = m_qnam.get(QNetworkRequest(m_url));    
-
-    qDebug() << m_reply->readAll().size();
 
     connect(m_reply,    SIGNAL(finished()),
             this,       SLOT(slot_httpFinished()));
@@ -108,8 +106,8 @@ void UDownloader::slot_httpFinished()
         Q_EMIT signal_redirectTo(m_url.resolved(redirectionTarget.toUrl()));
         return;
     } else {
-        QString fileName = QFileInfo(QUrl(QString(repository)).path()).fileName();
-        Q_EMIT signal_downloadFinished(fileName, QDir::currentPath());
+//        QString fileName = QFileInfo(m_url.path()).fileName();
+        Q_EMIT signal_downloadFinished(m_file->fileName()/*fileName*/, QDir::currentPath());
     }
 
     m_reply->deleteLater();

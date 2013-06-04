@@ -22,13 +22,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
     udownloader.cpp \
     uupdatewidget.cpp \
-    usettingsreader.cpp
+    usettingsreader.cpp \
+    ucheckupdateswidget.cpp \
+    uupdatewidget1.cpp
 
 HEADERS  += \
-    settings.h \
     udownloader.h \
     uupdatewidget.h \
-    usettingsreader.h
+    usettingsreader.h \
+    ucheckupdateswidget.h \
+    uupdatewidget1.h
 
-FORMS    += mainwindow.ui \
-    uupdatewidget.ui
+FORMS    += \
+    uupdatewidget.ui \
+    ucheckupdateswidget.ui \
+    uupdatewidget1.ui

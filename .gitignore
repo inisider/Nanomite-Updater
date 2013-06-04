@@ -20,7 +20,7 @@ Makefile
 .rcc
 .ui
 .obj
-bin
+#bin
 
 Makefile.Debug
 Makefile.Release
