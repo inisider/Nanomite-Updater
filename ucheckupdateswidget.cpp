@@ -1,9 +1,14 @@
 #include "ucheckupdateswidget.h"
 #include "ui_ucheckupdateswidget.h"
 
-#include "udownloader.h"
+#include <QDebug>
+#include <QDir>
+#include <QCryptographicHash>
 
-#define UPDATER_INI_REPO "https://github.com/zer0fl4g/Nanomite/blob/master/Build/x64/Release/QtCore4.dll?raw=true"
+#include "udownloader.h"
+#include "usettingsreader.h"
+
+#define UPDATER_INI_REPO "https://raw.github.com/inisider/Nanomite-Updater/UUpdateWidget/bin/updater.ini"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UCheckUpdatesWidget::UCheckUpdatesWidget(QWidget *parent) :
@@ -52,6 +57,33 @@ void UCheckUpdatesWidget::checkUpdates()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::processUpdates()
 {
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    QFile file;
+
+    USettingsReader settingsReader;
+    settingsReader.readSettings("updater.ini.tmp");
+
+    TReadSettings settings = settingsReader.getSettings();
+
+    TReadSettings::const_iterator it = settings.begin();
+
+    while (it != settings.end()) {
+        file.setFileName(QDir::currentPath() + '/' + it.key());
+
+        if (file.exists()) {
+            hash.addData(file.readAll());
+
+            if (hash.result() == it.value().hash) {
+                qDebug() << "hash is sample";
+            } else {
+                qDebug() << "need to be update file: " << file.fileName();
+            }
+        } else {
+            qDebug() << "file does not exist: " << file.fileName();
+        }
+
+        it++;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
