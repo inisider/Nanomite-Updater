@@ -24,14 +24,18 @@ SOURCES += main.cpp\
     uupdatewidget.cpp \
     usettingsreader.cpp \
     ucheckupdateswidget.cpp \
-    uupdatewidget1.cpp
+    uupdatewidget1.cpp \
+    updateitem.cpp \
+    uupdatesmodel.cpp
 
 HEADERS  += \
     udownloader.h \
     uupdatewidget.h \
     usettingsreader.h \
     ucheckupdateswidget.h \
-    uupdatewidget1.h
+    uupdatewidget1.h \
+    updateitem.h \
+    uupdatesmodel.h
 
 FORMS    += \
     uupdatewidget.ui \

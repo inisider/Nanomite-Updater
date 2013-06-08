@@ -67,7 +67,7 @@ void UDownloader::setUrl(QUrl url)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UDownloader::startRequest()
 {
-    m_reply = m_qnam.get(QNetworkRequest(m_url));    
+    m_reply = m_qnam.get(QNetworkRequest(m_url));
 
     connect(m_reply,    SIGNAL(finished()),
             this,       SLOT(slot_httpFinished()));

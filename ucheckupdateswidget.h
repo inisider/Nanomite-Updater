@@ -10,6 +10,8 @@ class UCheckUpdatesWidget;
 }
 
 class UDownloader;
+class UUpdatesModel;
+struct SSettingsInfo;
 
 class UCheckUpdatesWidget : public QWidget
 {
@@ -23,6 +25,7 @@ public:
 
 private:
     void processUpdates();
+    void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
 
 signals:
     void signal_downloadFailed(const QString &error);
@@ -37,6 +40,7 @@ protected slots:
 private:
     Ui::UCheckUpdatesWidget     *ui;
     UDownloader                 *m_downloader;
+    UUpdatesModel               *m_updatesModel;
 };
 
 #endif // UCHECKUPDATESWIDGET_H
