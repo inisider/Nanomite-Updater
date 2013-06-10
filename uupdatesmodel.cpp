@@ -110,7 +110,7 @@ bool UUpdatesModel::insertRows(int row, int count, const QModelIndex &parent)
     beginInsertRows(QModelIndex(), row, row + count - 1);
 
     for (int i = 0; i < count; ++i) {
-        m_updates.insert(i, new UpdateItem);
+        m_updates.insert(row, new UpdateItem);
     }
 
     endInsertRows();

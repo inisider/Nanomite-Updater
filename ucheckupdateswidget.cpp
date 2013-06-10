@@ -5,7 +5,9 @@
 #include <QDir>
 #include <QCryptographicHash>
 
-#include "udownloader.h"
+#include <QFile>
+
+#include "udownloadmanager.h"
 #include "usettingsreader.h"
 #include "uupdatesmodel.h"
 
@@ -43,25 +45,18 @@ void UCheckUpdatesWidget::checkUpdates()
         m_downloader = 0;
     }
 
-    m_downloader = new UDownloader;
+    m_downloader = new UDownloadManager;
 
     // init connections for communicating with class of downloading updates
-    connect(m_downloader,  SIGNAL(signal_downloadFailed(const QString &)),
-            this,          SLOT(slot_downloadFailed(const QString &)));
-    connect(m_downloader,  SIGNAL(signal_downloadFinished(const QString &,const QString &)),
-            this,          SLOT(slot_downloadFinished(const QString &, const QString &)));
-    connect(m_downloader,  SIGNAL(signal_redirectTo(const QUrl &)),
-            this,          SLOT(slot_redirectTo(const QUrl &)));
-    connect(m_downloader,  SIGNAL(signal_unableSaveFile(const QString &,const QString &)),
-            this,          SLOT(slot_unableSaveFile(const QString &, const QString &)));
+    connect(m_downloader,   SIGNAL(signal_finished(const QString &)),
+            this,           SLOT(slot_downloadFinished(const QString &)));
 
-    // start of working downloading updates
-    m_downloader->setUrl(QUrl(QString(UPDATER_INI_REPO)));
-    m_downloader->downloadUpdates();
+    m_downloader->append(QUrl(UPDATER_INI_REPO));
+    m_downloader->slot_startNextDownload();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::processUpdates()
+void UCheckUpdatesWidget::slot_processUpdates()
 {
     if (m_updatesModel != 0) {
         delete m_updatesModel;
@@ -103,10 +98,24 @@ void UCheckUpdatesWidget::processUpdates()
         it++;
     }
 
-    qDebug() << m_updatesModel->rowCount();
+    file.close();
 
-    // get sizes of files that need for updating
+    // add getting size of packages
     // ...
+
+    Q_EMIT signal_processUpdatesFinished(m_updatesModel);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::slot_downloadFinished(const QString &msg)
+{
+    if (msg.isEmpty() == true) {
+        slot_processUpdates();
+
+        Q_EMIT signal_downloadFinished();
+    } else {
+        Q_EMIT signal_downloadFailed(msg);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,34 +132,4 @@ void UCheckUpdatesWidget::addUpdateToModel(const SSettingsInfo *info, int *curre
     m_updatesModel->setData(index, info->link, Qt::DisplayRole);
 
     (*currentRow)++;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::slot_downloadFailed(const QString &error)
-{
-    Q_EMIT signal_downloadFailed(error);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::slot_downloadFinished(const QString &fileName, const QString &filePath)
-{
-    if (!fileName.isEmpty() && !filePath.isEmpty()) {
-        processUpdates();
-
-        Q_EMIT signal_downloadFinished(fileName, filePath);
-    } else {
-        Q_EMIT signal_downloadFailed("error while downloading");
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::slot_redirectTo(const QUrl &redirectedUrl)
-{
-    m_downloader->slot_redirectTo(redirectedUrl);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::slot_unableSaveFile(const QString &fileName, const QString &error)
-{
-    Q_EMIT signal_downloadFailed(QString("Something wrong while saving file %1; error: %2").arg(fileName).arg(error));
 }

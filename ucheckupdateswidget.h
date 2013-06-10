@@ -9,9 +9,9 @@ namespace Ui {
 class UCheckUpdatesWidget;
 }
 
-class UDownloader;
 class UUpdatesModel;
 struct SSettingsInfo;
+class UDownloadManager;
 
 class UCheckUpdatesWidget : public QWidget
 {
@@ -24,22 +24,21 @@ public:
     void checkUpdates();
 
 private:
-    void processUpdates();
     void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
 
 signals:
-    void signal_downloadFailed(const QString &error);
-    void signal_downloadFinished(const QString &fileName, const QString &filePath);
+    void signal_downloadFailed(const QString &);
+    void signal_downloadFinished(const QString &msg = "");
+    void signal_processUpdatesFinished(UUpdatesModel *model);
 
 protected slots:
-    void slot_downloadFailed(const QString &error);
-    void slot_downloadFinished(const QString &fileName, const QString &filePath);
-    void slot_redirectTo(const QUrl &redirectedUrl);
-    void slot_unableSaveFile(const QString &fileName, const QString &error);
+    void slot_processUpdates();
+
+    void slot_downloadFinished(const QString &msg);
 
 private:
     Ui::UCheckUpdatesWidget     *ui;
-    UDownloader                 *m_downloader;
+    UDownloadManager          *m_downloader;
     UUpdatesModel               *m_updatesModel;
 };
 

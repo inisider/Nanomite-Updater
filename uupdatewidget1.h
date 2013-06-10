@@ -5,7 +5,12 @@
 #include <QUrl>
 
 class QStackedWidget;
+class QProgressBar;
+
 class UCheckUpdatesWidget;
+class UUpdatesModel;
+class UUpdatesTableView;
+class UDownloader;
 
 namespace Ui {
 class UUpdateWidget1;
@@ -24,6 +29,7 @@ public slots:
     void slot_checkUpdates();
     void slot_checkUpdatesFailed(const QString &error);
     void slot_closeWidget();
+    void slot_showUpdatesTable(UUpdatesModel *model);
 
 private:
     enum EToolBarActions {
@@ -40,6 +46,10 @@ private:
 
     QStackedWidget      *m_stackedWidget;
     UCheckUpdatesWidget *m_checkUpdatesWidget;
+    UUpdatesTableView   *m_updatesTableView;
+    QList<QProgressBar *>   m_progressBarList;
+
+    UDownloader         *m_downloader;
 };
 
 #endif // UUPDATEWIDGET1_H
