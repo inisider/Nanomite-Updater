@@ -1,206 +1,172 @@
 #include "uupdatewidget.h"
 #include "ui_uupdatewidget.h"
 
-#include "settings.h"
-#include "usettingsreader.h"
-#include "ucheckupdateswidget.h"
+#include <QStackedWidget>
+#include <QMessageBox>
+#include <QProgressBar>
 
-#include <QDir>
+#include "ucheckupdateswidget.h"
+#include "uupdatesmodel.h"
+#include "uupdatestableview.h"
+#include "ufiledownloader.h"
+
 #include <QDebug>
 
-#include <QMessageBox>
-
-#include <QPushButton>
-
-#include <QToolBar>
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UUpdateWidget::UUpdateWidget(QWidget *parent) :
-    QWidget(parent),
-    m_ui(new Ui::UUpdateWidget)
+    QMainWindow(parent),
+    ui(new Ui::UUpdateWidget)
 {
-    m_ui->setupUi(this);
+    ui->setupUi(this);
 
-    setWindowFlags(Qt::CustomizeWindowHint);
     setFixedSize(size());
 
-    QToolBar * toolBar(new QToolBar(this));
-    {
-        toolBar->addAction(QPixmap(), "Install updates", this, SLOT(slot_installUpdatesAction()));
-        toolBar->addAction(QPixmap(), "Quit", this, SLOT(slot_closeWidget()));
-        toolBar->addSeparator();
-        toolBar->addAction(QPixmap(), "Check updates", this, SLOT(slot_checkUpdatesAction()));
-    }
-    m_ui->toolBarLayout->addWidget(toolBar);
-    m_toolBarActions = toolBar->actions();
+    ui->menubar->setHidden(true);
+    ui->statusbar->setHidden(true);
+    ui->toolBar->addAction(QPixmap(), "Install updates", this, SLOT(slot_downloadFileFinished()));
+    ui->toolBar->addAction(QPixmap(), "Quit", this, SLOT(slot_closeWidget()));
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QPixmap(), "Check updates", this, SLOT(slot_checkUpdates()));
+
+    m_toolBarActions = ui->toolBar->actions();
     m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
 
-    m_ui->stackedWidget->setHidden(true);
+    m_stackedWidget = new QStackedWidget(this);
+    m_checkUpdatesWidget = new UCheckUpdatesWidget(m_stackedWidget);
+    m_updatesTableView = new UUpdatesTableView(m_stackedWidget);
+
+    m_stackedWidget->addWidget(new QWidget(m_stackedWidget));
+    m_stackedWidget->addWidget(m_checkUpdatesWidget);
+    m_stackedWidget->addWidget(m_updatesTableView);
+
+    m_stackedWidget->setCurrentIndex(0);
+
+    setCentralWidget(m_stackedWidget);
+
+    connect(m_checkUpdatesWidget,   SIGNAL(signal_processUpdatesFinished(UUpdatesModel *)),
+            this,                   SLOT(slot_showUpdatesTable(UUpdatesModel *)));
+    connect(m_checkUpdatesWidget,   SIGNAL(signal_downloadFailed(QString)),
+            this,                   SLOT(slot_checkUpdatesFailed(QString)));
+
+    m_downloader = new UFileDownloader;
+
+    connect(m_downloader,   SIGNAL(signal_downloadFileFinished()),
+            this,           SLOT(slot_downloadFileFinished()));
+    connect(m_downloader,   SIGNAL(signal_error(QString)),
+            this,           SLOT(slot_error(QString)));
+
+    m_currentDownloadFile = -1;
+
+    connect(this,   SIGNAL(signal_downloadUpdatesFinished()),
+            this,   SLOT(slot_installUpdates()));
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UUpdateWidget::~UUpdateWidget()
 {
-    delete m_ui;
+    delete ui;
+
+    if (m_downloader != 0) {
+        delete m_downloader;
+        m_downloader = 0;
+    }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_downloadFailed(const QString &error)
-//{
-//    QMessageBox::information(this, tr("HTTP"),
-//                             tr("Download failed: %1.")
-//                             .arg(error));
-//    slot_closeWidget();
-//}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::slot_installUpdates()
+{
+    qDebug() << __FUNCTION__;
+    m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
+}
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_downloadFinished(const QString &fileName, const QString &filePath)
-//{
-//    if (!fileName.isEmpty() && !filePath.isEmpty()) {
-//        Q_EMIT signal_installUpdates(fileName, filePath);
-//    } else {
-//        QMessageBox::information(this, tr("HTTP"),
-//                                 tr("Download failed"));
-//        slot_closeWidget();
-//    }
-//}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::slot_checkUpdates()
+{
+    m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(false);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_redirectTo(const QUrl &redirectedUrl)
-//{
-//    slot_updateDataReadProgress(0, 0);
+    m_stackedWidget->setCurrentIndex(1);
+    m_checkUpdatesWidget->checkUpdates();
+}
 
-//    if (QMessageBox::question(this, tr("HTTP"),
-//                              tr("Redirect to %1 ?").arg(redirectedUrl.toString()),
-//                              QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-//        m_downloader->slot_redirectTo(redirectedUrl);
-//    } else {
-//        slot_closeWidget();
-//    }
-//}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::slot_checkUpdatesFailed(const QString &error)
+{
+    QMessageBox msgBox;
+    msgBox.setText(error);
+    msgBox.exec();
+}
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_unableSaveFile(const QString &fileName, const QString &error)
-//{
-//    QMessageBox::information(this, tr("HTTP"),
-//                             tr("Unable to save the file %1: %2.")
-//                             .arg(fileName).arg(error));
-//    slot_closeWidget();
-//}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_updateDataReadProgress(const qint64 bytesRead, const qint64 totalBytes)
-//{
-////    m_ui->m_progressBar->setMaximum(totalBytes);
-////    m_ui->m_progressBar->setValue(bytesRead);
-//}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_sslErrors(const QString &errors)
-//{
-//    if (QMessageBox::warning(this, tr("HTTP"),
-//                             tr("One or more SSL errors has occurred: %1").arg(errors),
-//                             QMessageBox::Ignore | QMessageBox::Abort) == QMessageBox::Ignore) {
-//        m_downloader->slot_ignoreSslErrors();
-//    }
-//}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_closeWidget()
-//{
-//    close();
-//}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::init()
-//{
-////    m_ui->m_currActionL->setText("Downloading updates");
-////    m_ui->m_progressBar->setValue(0);
-//}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::initConnections()
-//{
-//    // init connections for communicating with class of downloading updates
-//    connect(m_downloader,   SIGNAL(signal_downloadFailed(const QString &)),
-//            this,           SLOT(slot_downloadFailed(const QString &)));
-//    connect(m_downloader,   SIGNAL(signal_downloadFinished(const QString &,const QString &)),
-//            this,           SLOT(slot_downloadFinished(const QString &, const QString &)));
-//    connect(m_downloader,   SIGNAL(signal_redirectTo(const QUrl &)),
-//            this,           SLOT(slot_redirectTo(const QUrl &)));
-//    connect(m_downloader,   SIGNAL(signal_unableSaveFile(const QString &,const QString &)),
-//            this,           SLOT(slot_unableSaveFile(const QString &, const QString &)));
-//    connect(m_downloader,   SIGNAL(signal_updateDataReadProgress(const qint64, const qint64)),
-//            this,           SLOT(slot_updateDataReadProgress(const qint64, const qint64)));
-//#ifndef QT_NO_OPENSSL
-//    connect(m_downloader,   SIGNAL(signal_sslErrors(const QString &)),
-//            this,           SLOT(slot_sslErrors(const QString &)));
-//#endif
-
-//    // init connection for installing updates
-//    connect(this,           SIGNAL(signal_installUpdates(const QString &,const QString &)),
-//            this,           SLOT(slot_installUpdates(const QString &,const QString &)));
-
-//    // init connection for ...
-//}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void UUpdateWidget::slot_installUpdates(const QString &fileName, const QString &filePath)
-//{
-//    Q_UNUSED(fileName);
-//    Q_UNUSED(filePath);
-//////    QString destinationDir = filePath;
-//////    QDir baseDir(destinationDir);
-
-////    QZipReader unzip(fileName, QIODevice::ReadOnly);
-////    unzip.extractAll(filePath);
-////    unzip.close();
-//////    QList<QZipReader::FileInfo> allFiles = unzip.fileInfoList();
-//////    QZipReader::FileInfo fi;
-
-//////    foreach (QZipReader::FileInfo fi, allFiles)
-//////    {
-//////        const QString absPath = destinationDir + QDir::separator() + fi.filePath;
-//////        if (fi.isDir)
-//////        {
-//////            if (!baseDir.mkpath(fi.filePath))
-//////                 return;
-//////            if (!QFile::setPermissions(absPath, fi.permissions))
-//////                return;
-//////        }
-//////    }
-
-//////    foreach (QZipReader::FileInfo fi, allFiles)
-//////    {
-//////        const QString absPath = destinationDir + QDir::separator() + fi.filePath;
-//////        if (fi.isFile)
-//////        {
-//////            QFile file(absPath);
-//////            if( file.open(QFile::WriteOnly) )
-//////            {
-//////                QApplication::setOverrideCursor(Qt::WaitCursor);
-//////                file.write(unzip.fileData(fi.filePath), unzip.fileData(fi.filePath).size());
-//////                file.setPermissions(fi.permissions);
-//////                QApplication::restoreOverrideCursor();
-//////                file.close();
-//////            }
-//////        }
-//////    }
-//////    unzip.close();
-
-//    slot_closeWidget();
-//}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_closeWidget()
 {
     close();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UUpdateWidget::slot_checkUpdatesAction()
+void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
 {
-    m_ui->stackedWidget->setCurrentIndex(1);
-//    USettingsReader settingsReader;
-//    settingsReader.readSettings(settingsInfoFileName);
+    if (model->rowCount() == 0) {
+        qDebug() << "there is no updates";
+        m_stackedWidget->setCurrentIndex(0);
+        m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
+        m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
+        return;
+    }
+
+    m_updatesTableView->setModel(model);
+
+    QProgressBar *progressBar;
+    for (int i = 0; i < model->rowCount(); i++) {
+        progressBar = new QProgressBar(m_updatesTableView);
+
+        progressBar->setTextVisible(false);
+        progressBar->setMaximum(0);
+        progressBar->setMinimum(0);
+
+        m_progressBarList.append(progressBar);
+
+        m_updatesTableView->setIndexWidget(model->index(i, UUpdatesModel::eSTATUS), m_progressBarList.last());
+    }
+
+    m_updatesTableView->resizeColumnsToContents();
+
+    m_stackedWidget->setCurrentIndex(2);
+    m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(true);
+    m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(false);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::slot_downloadFileFinished()
+{
+    m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
+
+    m_currentDownloadFile++;
+
+    QAbstractTableModel *model = (UUpdatesModel *)m_updatesTableView->model();
+
+    if (m_currentDownloadFile == model->rowCount()) {
+        Q_EMIT signal_downloadUpdatesFinished();
+
+        return;
+    }
+
+    m_downloader->set_progressBar(m_progressBarList.at(m_currentDownloadFile));
+
+    QModelIndex index = model->index(m_currentDownloadFile, UUpdatesModel::ePACKAGE);
+
+    QString packageName = model->data(index, Qt::DisplayRole).toString();
+    if (packageName.contains('/') == true) {
+        int indx = packageName.indexOf('/');
+        m_downloader->setDir(packageName.remove(indx, packageName.size() - indx));
+    } else {
+        m_downloader->setDir("");
+    }
+
+    index = model->index(m_currentDownloadFile, UUpdatesModel::eURI);
+    m_downloader->slot_downloadFile(model->data(index, Qt::DisplayRole).toUrl());
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::slot_error(const QString &error)
+{
+    qDebug() << __FUNCTION__ << ':' << error;
+}
+

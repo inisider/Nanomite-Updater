@@ -1,57 +1,64 @@
 #ifndef UUPDATEWIDGET_H
 #define UUPDATEWIDGET_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QUrl>
+
+class QStackedWidget;
+class QProgressBar;
+
+class UCheckUpdatesWidget;
+class UUpdatesModel;
+class UUpdatesTableView;
+class UFileDownloader;
 
 namespace Ui {
 class UUpdateWidget;
 }
 
-class UUpdateWidget : public QWidget
+class UUpdateWidget : public QMainWindow
 {
     Q_OBJECT
     
 public:
     explicit UUpdateWidget(QWidget *parent = 0);
     ~UUpdateWidget();
-
-private:
-    void init();
-    void initConnections();
+    
+signals:
+    void signal_downloadUpdatesFinished();
 
 public slots:
+    void slot_installUpdates();
+    void slot_checkUpdates();
+    void slot_checkUpdatesFailed(const QString &error);
     void slot_closeWidget();
-    void slot_checkUpdatesAction();
+    void slot_showUpdatesTable(UUpdatesModel *model);
 
-//signals:
-//    void signal_installUpdates(const QString &fileName, const QString &filePath);
+protected slots:
+    void slot_downloadFileFinished();
+    void slot_error(const QString &error);
 
-//public slots:
-//    void slot_installUpdates(const QString &fileName, const QString &filePath);
-
-//    void slot_downloadFailed(const QString &error);
-//    void slot_downloadFinished(const QString &fileName, const QString &filePath);
-//    void slot_redirectTo(const QUrl &redirectedUrl);
-//    void slot_unableSaveFile(const QString &fileName, const QString &error);
-//    void slot_updateDataReadProgress(const qint64 bytesRead, const qint64 totalBytes);
-
-//#ifndef QT_NO_OPENSSL
-//    void slot_sslErrors(const QString &errors);
-//#endif
-
-//    void slot_closeWidget();
 private:
     enum EToolBarActions {
         eINSTALL_UPDATES_ACTION = 0,
         eQUIT_ACTION,
+        eSEPERATOR_ACTION,
         eCHECK_UPDATES_ACTION,
         eMAX_ACTION
     };
 
-    Ui::UUpdateWidget   *m_ui;
+    Ui::UUpdateWidget   *ui;
 
     QList<QAction *>    m_toolBarActions;
+
+    QStackedWidget      *m_stackedWidget;
+    UCheckUpdatesWidget *m_checkUpdatesWidget;
+    UUpdatesTableView   *m_updatesTableView;
+    QList<QProgressBar *>   m_progressBarList;
+
+    UFileDownloader     *m_downloader;
+
+    unsigned int        m_currentDownloadFile;
 };
 
 #endif // UUPDATEWIDGET_H
