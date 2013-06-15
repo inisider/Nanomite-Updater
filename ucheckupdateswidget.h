@@ -11,7 +11,7 @@ class UCheckUpdatesWidget;
 
 class UUpdatesModel;
 struct SSettingsInfo;
-class UDownloadManager;
+class UFileDownloader;
 
 class UCheckUpdatesWidget : public QWidget
 {
@@ -34,12 +34,17 @@ signals:
 protected slots:
     void slot_processUpdates();
 
-    void slot_downloadFinished(const QString &msg);
+    void slot_downloadFinished();
+    void slot_gettingFilesSize();
+    void slot_getFileSize(unsigned int size);
+
+    void slot_downloaderError(const QString &msg);
 
 private:
     Ui::UCheckUpdatesWidget     *ui;
-    UDownloadManager          *m_downloader;
+    UFileDownloader             *m_downloader;
     UUpdatesModel               *m_updatesModel;
+    unsigned int                m_currentUpdate;
 };
 
 #endif // UCHECKUPDATESWIDGET_H

@@ -27,7 +27,7 @@ SOURCES += main.cpp\
     updateitem.cpp \
     uupdatesmodel.cpp \
     uupdatestableview.cpp \
-    udownloadmanager.cpp
+    ufiledownloader.cpp
 
 HEADERS  += \
     uupdatewidget.h \
@@ -37,7 +37,7 @@ HEADERS  += \
     updateitem.h \
     uupdatesmodel.h \
     uupdatestableview.h \
-    udownloadmanager.h
+    ufiledownloader.h
 
 FORMS    += \
     uupdatewidget.ui \

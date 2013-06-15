@@ -4,8 +4,6 @@
 #include <QWidget>
 #include <QUrl>
 
-#include "udownloader.h"
-
 namespace Ui {
 class UUpdateWidget;
 }
@@ -52,7 +50,6 @@ private:
     };
 
     Ui::UUpdateWidget   *m_ui;
-    UDownloader         m_downloader;
 
     QList<QAction *>    m_toolBarActions;
 };

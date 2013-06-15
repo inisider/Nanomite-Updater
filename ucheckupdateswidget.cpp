@@ -7,7 +7,7 @@
 
 #include <QFile>
 
-#include "udownloadmanager.h"
+#include "ufiledownloader.h"
 #include "usettingsreader.h"
 #include "uupdatesmodel.h"
 
@@ -16,9 +16,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UCheckUpdatesWidget::UCheckUpdatesWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::UCheckUpdatesWidget), m_downloader(0), m_updatesModel(0)
+    ui(new Ui::UCheckUpdatesWidget), m_updatesModel(0), m_currentUpdate(0)
 {
     ui->setupUi(this);
+
+    m_downloader = new UFileDownloader;
+
+    connect(m_downloader,   SIGNAL(signal_error(QString)),
+            this,           SLOT(slot_downloaderError(QString)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,24 +45,32 @@ UCheckUpdatesWidget::~UCheckUpdatesWidget()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::checkUpdates()
 {
-    if (m_downloader != 0) {
-        delete m_downloader;
-        m_downloader = 0;
-    }
+    qDebug() << __FUNCTION__;
 
-    m_downloader = new UDownloadManager;
+//    if (m_downloader != 0) {
+//        delete m_downloader;
+//        m_downloader = 0;
+//    }
+
+//    m_downloader = new UDownloadManager;
 
     // init connections for communicating with class of downloading updates
-    connect(m_downloader,   SIGNAL(signal_finished(const QString &)),
-            this,           SLOT(slot_downloadFinished(const QString &)));
+    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
+               this,            SLOT(slot_downloadFinished()));
+    disconnect(m_downloader,    SIGNAL(signal_gotFileSize(uint)),
+               this,            SLOT(slot_getFileSize(uint)));
 
-    m_downloader->append(QUrl(UPDATER_INI_REPO));
-    m_downloader->slot_startNextDownload();
+    connect(m_downloader,   SIGNAL(signal_downloadFileFinished()),
+            this,           SLOT(slot_downloadFinished()));
+
+    m_downloader->slot_downloadFile(QUrl(UPDATER_INI_REPO));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::slot_processUpdates()
 {
+    m_currentUpdate = 0;
+
     if (m_updatesModel != 0) {
         delete m_updatesModel;
         m_updatesModel = 0;
@@ -102,19 +115,64 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     // add getting size of packages
     // ...
+    slot_gettingFilesSize();
 
-    Q_EMIT signal_processUpdatesFinished(m_updatesModel);
+//    Q_EMIT signal_processUpdatesFinished(m_updatesModel);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::slot_downloadFinished(const QString &msg)
+void UCheckUpdatesWidget::slot_downloadFinished()
 {
-    if (msg.isEmpty() == true) {
-        slot_processUpdates();
+    slot_processUpdates();
+    Q_EMIT signal_downloadFinished();
+}
 
-        Q_EMIT signal_downloadFinished();
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::slot_gettingFilesSize()
+{
+    if (m_currentUpdate == (m_updatesModel->rowCount())) {
+        Q_EMIT signal_processUpdatesFinished(m_updatesModel);
+
+        return;
+    }
+
+    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
+               this,            SLOT(slot_downloadFinished()));
+    disconnect(m_downloader,    SIGNAL(signal_gotFileSize(uint)),
+               this,            SLOT(slot_getFileSize(uint)));
+
+    connect(m_downloader,       SIGNAL(signal_gotFileSize(uint)),
+            this,               SLOT(slot_getFileSize(uint)));
+
+
+    QModelIndex index = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eURI);
+
+    QString str = m_updatesModel->data(index, Qt::DisplayRole).toString();
+    qDebug() << str;
+
+    m_downloader->slot_getFileSize(QUrl(m_updatesModel->data(index, Qt::DisplayRole).toString()));
+
+    m_currentUpdate++;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::slot_getFileSize(unsigned int size)
+{
+    qDebug() << __FUNCTION__ << " " << size;
+
+    QModelIndex index = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eSIZE);
+    m_updatesModel->setData(index, size, Qt::DisplayRole);
+
+    slot_gettingFilesSize();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::slot_downloaderError(const QString &msg)
+{
+    if (msg == "Error while getting size of the file") {
+        slot_gettingFilesSize();
     } else {
-        Q_EMIT signal_downloadFailed(msg);
+        qDebug() << msg;
     }
 }
 

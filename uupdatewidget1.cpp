@@ -8,7 +8,6 @@
 #include "ucheckupdateswidget.h"
 #include "uupdatesmodel.h"
 #include "uupdatestableview.h"
-#include "udownloader.h"
 
 #include <QDebug>
 
