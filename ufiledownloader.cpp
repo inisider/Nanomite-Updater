@@ -98,7 +98,7 @@ void UFileDownloader::slot_downloadFile(QUrl url)
     disconnect(&m_manager, SIGNAL(finished(QNetworkReply*)),
                this,       SLOT(slot_getFileSize(QNetworkReply*)));
 
-    QNetworkRequest request(url);
+    QNetworkRequest request(m_url);
 
     m_reply = m_manager.get(request);
 
@@ -164,8 +164,9 @@ void UFileDownloader::slot_downloadFileFinished()
         Q_EMIT signal_downloadFileFinished();
     }
 
-    if (isRedirectTarget == false)
-        m_reply->deleteLater();
+    //FIXME: why this is so????
+//    if (isRedirectTarget == false)
+//        m_reply->deleteLater();
 }
 
 void UFileDownloader::slot_readFile()

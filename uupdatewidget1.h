@@ -10,7 +10,7 @@ class QProgressBar;
 class UCheckUpdatesWidget;
 class UUpdatesModel;
 class UUpdatesTableView;
-class UDownloader;
+class UFileDownloader;
 
 namespace Ui {
 class UUpdateWidget1;
@@ -24,12 +24,19 @@ public:
     explicit UUpdateWidget1(QWidget *parent = 0);
     ~UUpdateWidget1();
     
+signals:
+    void signal_downloadUpdatesFinished();
+
 public slots:
     void slot_installUpdates();
     void slot_checkUpdates();
     void slot_checkUpdatesFailed(const QString &error);
     void slot_closeWidget();
     void slot_showUpdatesTable(UUpdatesModel *model);
+
+protected slots:
+    void slot_downloadFileFinished();
+    void slot_error(const QString &error);
 
 private:
     enum EToolBarActions {
@@ -49,7 +56,9 @@ private:
     UUpdatesTableView   *m_updatesTableView;
     QList<QProgressBar *>   m_progressBarList;
 
-    UDownloader         *m_downloader;
+    UFileDownloader     *m_downloader;
+
+    unsigned int        m_currentDownloadFile;
 };
 
 #endif // UUPDATEWIDGET1_H

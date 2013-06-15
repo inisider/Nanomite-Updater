@@ -113,8 +113,6 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     file.close();
 
-    // add getting size of packages
-    // ...
     slot_gettingFilesSize();
 }
 

@@ -8,6 +8,7 @@
 #include "ucheckupdateswidget.h"
 #include "uupdatesmodel.h"
 #include "uupdatestableview.h"
+#include "ufiledownloader.h"
 
 #include <QDebug>
 
@@ -21,7 +22,7 @@ UUpdateWidget1::UUpdateWidget1(QWidget *parent) :
 
     ui->menubar->setHidden(true);
     ui->statusbar->setHidden(true);
-    ui->toolBar->addAction(QPixmap(), "Install updates", this, SLOT(slot_installUpdates()));
+    ui->toolBar->addAction(QPixmap(), "Install updates", this, SLOT(slot_downloadFileFinished()));
     ui->toolBar->addAction(QPixmap(), "Quit", this, SLOT(slot_closeWidget()));
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(QPixmap(), "Check updates", this, SLOT(slot_checkUpdates()));
@@ -46,7 +47,17 @@ UUpdateWidget1::UUpdateWidget1(QWidget *parent) :
     connect(m_checkUpdatesWidget,   SIGNAL(signal_downloadFailed(QString)),
             this,                   SLOT(slot_checkUpdatesFailed(QString)));
 
-    m_downloader = 0;
+    m_downloader = new UFileDownloader;
+
+    connect(m_downloader,   SIGNAL(signal_downloadFileFinished()),
+            this,           SLOT(slot_downloadFileFinished()));
+    connect(m_downloader,   SIGNAL(signal_error(QString)),
+            this,           SLOT(slot_error(QString)));
+
+    m_currentDownloadFile = -1;
+
+    connect(this,   SIGNAL(signal_downloadUpdatesFinished()),
+            this,   SLOT(slot_installUpdates()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,12 +74,7 @@ UUpdateWidget1::~UUpdateWidget1()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget1::slot_installUpdates()
 {
-    if (m_downloader != 0) {
-        delete m_downloader;
-        m_downloader = 0;
-    }
-
-//    m_downloader = new UDownloader;
+    qDebug() << __FUNCTION__;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,5 +128,31 @@ void UUpdateWidget1::slot_showUpdatesTable(UUpdatesModel *model)
     m_stackedWidget->setCurrentIndex(2);
     m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(true);
     m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(false);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget1::slot_downloadFileFinished()
+{
+    m_currentDownloadFile++;
+
+    QAbstractTableModel *model = (UUpdatesModel *)m_updatesTableView->model();
+
+    if (m_currentDownloadFile == model->rowCount()) {
+        Q_EMIT signal_downloadUpdatesFinished();
+
+        return;
+    }
+
+    m_downloader->set_progressBar(m_progressBarList.at(m_currentDownloadFile));
+
+    QModelIndex indx = model->index(m_currentDownloadFile, UUpdatesModel::eURI);
+    m_downloader->slot_downloadFile(model->data(indx, Qt::DisplayRole).toUrl());
+    qDebug() << model->data(indx, Qt::DisplayRole).toUrl();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget1::slot_error(const QString &error)
+{
+    qDebug() << __FUNCTION__ << ':' << error;
 }
 
