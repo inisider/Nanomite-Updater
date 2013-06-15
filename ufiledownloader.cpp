@@ -4,12 +4,13 @@
 #include <QNetworkReply>
 #include <QFileInfo>
 #include <QProgressBar>
+#include <QDir>
 
 #include <QDebug>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UFileDownloader::UFileDownloader(QObject *parent) :
-    QObject(parent), m_pb(0)
+    QObject(parent), m_pathDir(""), m_pb(0)
 {
     connect(this,   SIGNAL(signal_redirectTo(QUrl)),
             this,   SLOT(slot_downloadFile(QUrl)));
@@ -30,10 +31,20 @@ void UFileDownloader::set_progressBar(QProgressBar *pb)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UFileDownloader::setDir(const QString &pathDir)
+{
+    m_pathDir = pathDir;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 QString UFileDownloader::saveFileName(const QUrl &url)
 {
     QString path = url.path();
-    QString basename = QFileInfo(path).fileName() + ".tmp";
+    QString basename = QFileInfo(path).fileName();
+
+    if (m_pathDir.isEmpty() == false) {
+        basename = QDir::currentPath() + '/' + m_pathDir + '/' + basename;
+    }
 
     if (basename.isEmpty())
         basename = "download";

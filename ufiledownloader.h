@@ -16,6 +16,7 @@ public:
     virtual ~UFileDownloader();
     
     void set_progressBar(QProgressBar *pb);
+    void setDir(const QString &pathDir);
 
 private:
     QString saveFileName(const QUrl &url);
@@ -43,6 +44,7 @@ private:
     QNetworkAccessManager   m_manager;
     QUrl                    m_url;
     QFile                   m_file;
+    QString                 m_pathDir;
     QNetworkReply           *m_reply;
     QProgressBar            *m_pb;
 };

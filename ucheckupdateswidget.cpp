@@ -11,7 +11,7 @@
 #include "usettingsreader.h"
 #include "uupdatesmodel.h"
 
-#define UPDATER_INI_REPO "https://raw.github.com/inisider/Nanomite-Updater/UUpdateWidget/bin/updater.ini"
+#define UPDATER_INI_X64 "https://raw.github.com/zer0fl4g/Nanomite/master/Build/x64/Release/updater.ini"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UCheckUpdatesWidget::UCheckUpdatesWidget(QWidget *parent) :
@@ -63,7 +63,7 @@ void UCheckUpdatesWidget::checkUpdates()
     connect(m_downloader,   SIGNAL(signal_downloadFileFinished()),
             this,           SLOT(slot_downloadFinished()));
 
-    m_downloader->slot_downloadFile(QUrl(UPDATER_INI_REPO));
+    m_downloader->slot_downloadFile(QUrl(UPDATER_INI_X64));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ void UCheckUpdatesWidget::slot_processUpdates()
     QFile file;
 
     USettingsReader settingsReader;
-    settingsReader.readSettings("updater.ini.tmp");
+    settingsReader.readSettings("updater.ini");
 
     TReadSettings settings = settingsReader.getSettings();
 
@@ -100,10 +100,18 @@ void UCheckUpdatesWidget::slot_processUpdates()
             if (hash.result() != it.value().hash) {
                 addUpdateToModel(&it.value(), &currentRow);
 
+                QFile::remove(file.fileName());
                 qDebug() << "need to be update file: " << file.fileName(); // add file for updating
             }
         } else {
             addUpdateToModel(&it.value(), &currentRow);
+
+            if (it.key().contains('/') == true) {
+                QString tmp = it.key();
+                int indx = tmp.indexOf('/');
+                QDir dir(QDir::currentPath());
+                dir.mkdir(tmp.remove(indx, tmp.size() - indx));
+            }
 
             qDebug() << "file does not exist: " << file.fileName(); // add file for updating...
         }
@@ -164,6 +172,8 @@ void UCheckUpdatesWidget::slot_getFileSize(unsigned int size)
 void UCheckUpdatesWidget::slot_downloaderError(const QString &msg)
 {
     if (msg == "Error while getting size of the file") {
+        slot_gettingFilesSize();
+    } else if (msg == "Error URL") {
         slot_gettingFilesSize();
     } else {
         qDebug() << msg;

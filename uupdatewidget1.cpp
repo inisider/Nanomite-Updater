@@ -75,11 +75,14 @@ UUpdateWidget1::~UUpdateWidget1()
 void UUpdateWidget1::slot_installUpdates()
 {
     qDebug() << __FUNCTION__;
+    m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget1::slot_checkUpdates()
 {
+    m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(false);
+
     m_stackedWidget->setCurrentIndex(1);
     m_checkUpdatesWidget->checkUpdates();
 }
@@ -133,6 +136,8 @@ void UUpdateWidget1::slot_showUpdatesTable(UUpdatesModel *model)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget1::slot_downloadFileFinished()
 {
+    m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
+
     m_currentDownloadFile++;
 
     QAbstractTableModel *model = (UUpdatesModel *)m_updatesTableView->model();
@@ -145,9 +150,18 @@ void UUpdateWidget1::slot_downloadFileFinished()
 
     m_downloader->set_progressBar(m_progressBarList.at(m_currentDownloadFile));
 
-    QModelIndex indx = model->index(m_currentDownloadFile, UUpdatesModel::eURI);
-    m_downloader->slot_downloadFile(model->data(indx, Qt::DisplayRole).toUrl());
-    qDebug() << model->data(indx, Qt::DisplayRole).toUrl();
+    QModelIndex index = model->index(m_currentDownloadFile, UUpdatesModel::ePACKAGE);
+
+    QString packageName = model->data(index, Qt::DisplayRole).toString();
+    if (packageName.contains('/') == true) {
+        int indx = packageName.indexOf('/');
+        m_downloader->setDir(packageName.remove(indx, packageName.size() - indx));
+    } else {
+        m_downloader->setDir("");
+    }
+
+    index = model->index(m_currentDownloadFile, UUpdatesModel::eURI);
+    m_downloader->slot_downloadFile(model->data(index, Qt::DisplayRole).toUrl());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
