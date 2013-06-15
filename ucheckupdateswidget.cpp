@@ -7,11 +7,17 @@
 
 #include <QFile>
 
+#include <Windows.h>
+
 #include "ufiledownloader.h"
 #include "usettingsreader.h"
 #include "uupdatesmodel.h"
 
 #define UPDATER_INI_X64 "https://raw.github.com/zer0fl4g/Nanomite/master/Build/x64/Release/updater.ini"
+
+#define UPDATER_INI_X32 "https://raw.github.com/zer0fl4g/Nanomite/master/Build/Win32/Release/updater.ini"
+
+typedef BOOL (WINAPI *IW64PFP)(HANDLE, BOOL *);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 UCheckUpdatesWidget::UCheckUpdatesWidget(QWidget *parent) :
@@ -63,7 +69,22 @@ void UCheckUpdatesWidget::checkUpdates()
     connect(m_downloader,   SIGNAL(signal_downloadFileFinished()),
             this,           SLOT(slot_downloadFinished()));
 
-    m_downloader->slot_downloadFile(QUrl(UPDATER_INI_X64));
+    QUrl url;
+
+    BOOL is64Bit = FALSE;
+    IW64PFP IW64P = (IW64PFP)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "IsWow64Process");
+    if(IW64P != NULL)
+    {
+        IW64P(GetCurrentProcess(), &is64Bit);
+    }
+
+    if (is64Bit == TRUE) {
+        url.setUrl(QString(UPDATER_INI_X64));
+    } else {
+        url.setUrl(QString(UPDATER_INI_X32));
+    }
+
+    m_downloader->slot_downloadFile(url);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
