@@ -116,8 +116,6 @@ void UCheckUpdatesWidget::slot_processUpdates()
     // add getting size of packages
     // ...
     slot_gettingFilesSize();
-
-//    Q_EMIT signal_processUpdatesFinished(m_updatesModel);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,8 +145,8 @@ void UCheckUpdatesWidget::slot_gettingFilesSize()
 
     QModelIndex index = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eURI);
 
-    QString str = m_updatesModel->data(index, Qt::DisplayRole).toString();
-    qDebug() << str;
+    QModelIndex indx = m_updatesModel->index(m_currentUpdate, UUpdatesModel::ePACKAGE);
+    qDebug() << m_updatesModel->data(indx, Qt::DisplayRole).toString();
 
     m_downloader->slot_getFileSize(QUrl(m_updatesModel->data(index, Qt::DisplayRole).toString()));
 
@@ -158,9 +156,7 @@ void UCheckUpdatesWidget::slot_gettingFilesSize()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::slot_getFileSize(unsigned int size)
 {
-    qDebug() << __FUNCTION__ << " " << size;
-
-    QModelIndex index = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eSIZE);
+    QModelIndex index = m_updatesModel->index(m_currentUpdate - 1, UUpdatesModel::eSIZE);
     m_updatesModel->setData(index, size, Qt::DisplayRole);
 
     slot_gettingFilesSize();
