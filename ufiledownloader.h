@@ -32,7 +32,7 @@ signals:
 
 public slots:
     void slot_getFileSize(QUrl url);
-    void slot_downloadFile(QUrl url);
+    void slot_downloadFile(QUrl url, const QString &neededFileName = "");
 
 private slots:
     void slot_getFileSize(QNetworkReply *pReply);

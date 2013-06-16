@@ -7,6 +7,8 @@
 
 #include <QFile>
 
+#include <QProcess>
+
 #include <Windows.h>
 
 #include "ufiledownloader.h"
@@ -52,13 +54,6 @@ UCheckUpdatesWidget::~UCheckUpdatesWidget()
 void UCheckUpdatesWidget::checkUpdates()
 {
     qDebug() << __FUNCTION__;
-
-//    if (m_downloader != 0) {
-//        delete m_downloader;
-//        m_downloader = 0;
-//    }
-
-//    m_downloader = new UDownloadManager;
 
     // init connections for communicating with class of downloading updates
     disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
@@ -108,6 +103,12 @@ void UCheckUpdatesWidget::slot_processUpdates()
     settingsReader.readSettings("updater.ini");
 
     TReadSettings settings = settingsReader.getSettings();
+
+    if (settings.contains("updater.exe") == true) {
+        if (updateUpdater(&settings["updater.exe"]) == true) {
+            return;
+        }
+    }
 
     TReadSettings::const_iterator it = settings.begin();
 
@@ -168,6 +169,8 @@ void UCheckUpdatesWidget::slot_gettingFilesSize()
                this,            SLOT(slot_downloadFinished()));
     disconnect(m_downloader,    SIGNAL(signal_gotFileSize(uint)),
                this,            SLOT(slot_getFileSize(uint)));
+    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
+               this,            SLOT(slot_setupNewUpdater()));
 
     connect(m_downloader,       SIGNAL(signal_gotFileSize(uint)),
             this,               SLOT(slot_getFileSize(uint)));
@@ -205,6 +208,16 @@ void UCheckUpdatesWidget::slot_downloaderError(const QString &msg)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::slot_setupNewUpdater()
+{
+    QProcess process;
+
+    process.start("updater_tmp.exe", QStringList() << "update");
+//    QProcess::execute("");
+    exit(1);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::addUpdateToModel(const SSettingsInfo *info, int *currentRow)
 {
     QModelIndex index;
@@ -218,4 +231,39 @@ void UCheckUpdatesWidget::addUpdateToModel(const SSettingsInfo *info, int *curre
     m_updatesModel->setData(index, info->link, Qt::DisplayRole);
 
     (*currentRow)++;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool UCheckUpdatesWidget::updateUpdater(const SSettingsInfo *info)
+{
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    QFile file;
+    file.setFileName("updater.exe");
+
+    if (file.open(QIODevice::ReadOnly) == true) {
+        hash.addData(file.readAll());
+
+        if (hash.result().toHex() != info->hash) {
+            downloadNewUpdater(info->link);
+            return true;
+        }
+    }
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::downloadNewUpdater(const QUrl &url)
+{
+    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
+               this,            SLOT(slot_downloadFinished()));
+    disconnect(m_downloader,    SIGNAL(signal_gotFileSize(uint)),
+               this,            SLOT(slot_getFileSize(uint)));
+    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
+               this,            SLOT(slot_setupNewUpdater()));
+
+    connect(m_downloader,       SIGNAL(signal_downloadFileFinished()),
+            this,               SLOT(slot_setupNewUpdater()));
+
+
+    m_downloader->slot_downloadFile(url, "updater_tmp.exe");
 }

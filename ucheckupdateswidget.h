@@ -25,6 +25,8 @@ public:
 
 private:
     void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
+    bool updateUpdater(const SSettingsInfo *info);
+    void downloadNewUpdater(const QUrl &url);
 
 signals:
     void signal_downloadFailed(const QString &);
@@ -39,6 +41,8 @@ protected slots:
     void slot_getFileSize(unsigned int size);
 
     void slot_downloaderError(const QString &msg);
+
+    void slot_setupNewUpdater();
 
 private:
     Ui::UCheckUpdatesWidget     *ui;

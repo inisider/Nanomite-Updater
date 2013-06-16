@@ -84,7 +84,7 @@ void UFileDownloader::slot_getFileSize(QUrl url)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UFileDownloader::slot_downloadFile(QUrl url)
+void UFileDownloader::slot_downloadFile(QUrl url, const QString &neededFileName)
 {
     m_url = url;
 
@@ -95,7 +95,8 @@ void UFileDownloader::slot_downloadFile(QUrl url)
 
     m_file.close();
 
-    QString fileName = saveFileName(m_url);
+    QString fileName = (neededFileName.isEmpty() == true) ? saveFileName(m_url) : neededFileName;
+
     m_file.setFileName(fileName);
     if (!m_file.open(QIODevice::WriteOnly)) {
         qDebug() << __FUNCTION__ << "error while opening file";
@@ -155,7 +156,7 @@ void UFileDownloader::slot_downloadProgress(qint64 bytesReceived, qint64 bytesTo
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UFileDownloader::slot_downloadFileFinished()
 {
-    m_file.close();
+//    m_file.close();
 
     bool isRedirectTarget = false;
 
