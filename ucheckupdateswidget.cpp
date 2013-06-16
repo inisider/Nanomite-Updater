@@ -214,8 +214,8 @@ void UCheckUpdatesWidget::slot_setupNewUpdater()
 {
     QProcess process;
 
-//    process.start("updater_tmp.exe", QStringList() << "update");
-//    exit(1);
+    process.start("updater_tmp.exe", QStringList() << "update");
+    exit(1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
