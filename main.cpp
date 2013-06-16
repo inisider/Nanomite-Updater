@@ -2,12 +2,18 @@
 
 #include <QFile>
 #include <QProcess>
+#include <QMessageBox>
 
 #include "uupdatewidget.h"
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QMessageBox::information(0, "Nanomite updater",
+                             QString("%1").arg(argc));
+
 
     if (argc == 2) {
         if (strcpy(argv[1], "update") == 0) {
