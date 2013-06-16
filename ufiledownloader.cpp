@@ -156,7 +156,7 @@ void UFileDownloader::slot_downloadProgress(qint64 bytesReceived, qint64 bytesTo
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UFileDownloader::slot_downloadFileFinished()
 {
-//    m_file.close();
+    m_file.close();
 
     bool isRedirectTarget = false;
 

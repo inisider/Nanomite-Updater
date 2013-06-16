@@ -15,7 +15,9 @@
 #include "usettingsreader.h"
 #include "uupdatesmodel.h"
 
-#define UPDATER_INI_X64 "https://raw.github.com/inisider/Nanomite-Updater/UUpdateWidget/bin/updater.ini" //https://raw.github.com/zer0fl4g/Nanomite/master/Build/x64/Release/updater.ini"
+#define UPDATER_INI_X64 "https://raw.github.com/inisider/Nanomite-Updater/UUpdateWidget/bin/updater.ini"
+//"https://raw.github.com/inisider/Nanomite-Updater/UUpdateWidget/bin/updater.ini"
+//https://raw.github.com/zer0fl4g/Nanomite/master/Build/x64/Release/updater.ini"
 
 #define UPDATER_INI_X32 "https://raw.github.com/zer0fl4g/Nanomite/master/Build/Win32/Release/updater.ini"
 
@@ -212,9 +214,8 @@ void UCheckUpdatesWidget::slot_setupNewUpdater()
 {
     QProcess process;
 
-    process.start("updater_tmp.exe", QStringList() << "update");
-//    QProcess::execute("");
-    exit(1);
+//    process.start("updater_tmp.exe", QStringList() << "update");
+//    exit(1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
