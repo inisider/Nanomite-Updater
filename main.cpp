@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
         QMessageBox::information(0, "Nanomite updater",
                                  QString("%1").arg(argv[1]));
         if (strcpy(argv[1], "update") == 0) {
+            QMessageBox::information(0, "Nanomite updater",
+                                     QString("equal"));
             QFile::remove("updater.exe");
             QFile::copy("updater_tmp.exe", "updater.exe");
             QFile::remove("updater_tmp.exe");
