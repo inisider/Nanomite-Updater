@@ -163,8 +163,8 @@ void UFileDownloader::slot_downloadFileFinished()
 
     if (m_reply->error()) {
         m_pb = 0;
-        qDebug() << __FUNCTION__ << " error while getting size of the file";
-        Q_EMIT signal_error("Error while getting size of the file");
+        qDebug() << __FUNCTION__ << " Error while downloading file";
+        Q_EMIT signal_error("Error while downloading file");
     } else if (!redirectionTarget.isNull()) {
         qDebug() << __FUNCTION__ << " redirected link: " << redirectionTarget.toUrl();
         isRedirectTarget = true;

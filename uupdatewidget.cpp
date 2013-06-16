@@ -76,11 +76,20 @@ void UUpdateWidget::slot_installUpdates()
 {
     qDebug() << __FUNCTION__;
     m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
+
+    m_stackedWidget->setCurrentIndex(0);
+    m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
+    m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
+
+    QMessageBox::information(this, tr("Nanomite updater"),
+                                    tr("The update is completed"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_checkUpdates()
 {
+    m_currentDownloadFile = -1;
+
     m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(false);
 
     m_stackedWidget->setCurrentIndex(1);
@@ -105,6 +114,10 @@ void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
 {
     if (model->rowCount() == 0) {
         qDebug() << "there is no updates";
+
+        QMessageBox::information(this, tr("Nanomite updater"),
+                                        tr("There is no updates"));
+
         m_stackedWidget->setCurrentIndex(0);
         m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
         m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
@@ -112,14 +125,15 @@ void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
     }
 
     m_updatesTableView->setModel(model);
+    m_progressBarList.clear();
 
     QProgressBar *progressBar;
     for (int i = 0; i < model->rowCount(); i++) {
         progressBar = new QProgressBar(m_updatesTableView);
 
         progressBar->setTextVisible(false);
-        progressBar->setMaximum(0);
         progressBar->setMinimum(0);
+        progressBar->setMaximum(0);        
 
         m_progressBarList.append(progressBar);
 
@@ -168,5 +182,9 @@ void UUpdateWidget::slot_downloadFileFinished()
 void UUpdateWidget::slot_error(const QString &error)
 {
     qDebug() << __FUNCTION__ << ':' << error;
+
+    if (error == "Error URL" || error == "Error while downloading file") {
+        slot_downloadFileFinished();
+    }
 }
 
