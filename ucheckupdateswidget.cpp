@@ -113,12 +113,15 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     // check if is it new updates
     while (it != settings.end()) {
-        file.setFileName(QDir::currentPath() + '/' + it.key());
+        hash.reset();
+        file.close();
 
-        if (file.exists()) {
+        file.setFileName(/*QDir::currentPath() + '/' +*/ it.key());
+
+        if (file.open(QIODevice::ReadOnly) == true) {
             hash.addData(file.readAll());
 
-            if (hash.result() != it.value().hash) {
+            if (hash.result().toHex() != it.value().hash) {
                 addUpdateToModel(&it.value(), &currentRow);
 
                 QFile::remove(file.fileName());

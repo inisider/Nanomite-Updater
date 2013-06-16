@@ -3,8 +3,6 @@
 #include <QSettings>
 #include <QStringList>
 
-#include <QDebug>
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 USettingsReader::USettingsReader()
 {
@@ -24,6 +22,10 @@ void USettingsReader::readSettings(const QString &fileName)
 //        m_readSettings[currSetting.fileName] = currSetting;
 //    }
 
+
+    // This is ugly way, because I did not find way how to read NAME section that may look like:
+    // [folder/fileName]
+    // Way above can read NAME section that may look like: [fileName]
     QString tmp;
     int indx;
     for (int i = 0; i < settings.allKeys().size(); i += 2) {
