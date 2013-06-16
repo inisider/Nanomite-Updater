@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
         if (strcpy(argv[1], "update") == 0) {
             QFile::remove("updater.exe");
             QFile::copy("updater_tmp.exe", "updater.exe");
+            QFile::remove("updater_tmp.exe");
             QProcess process;
             process.start("updater.exe");
             exit(1);
