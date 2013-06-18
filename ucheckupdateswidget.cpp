@@ -1,6 +1,8 @@
 #include "ucheckupdateswidget.h"
 #include "ui_ucheckupdateswidget.h"
 
+#include <QMessageBox>
+
 #include <QDebug>
 #include <QDir>
 #include <QCryptographicHash>
@@ -207,6 +209,10 @@ void UCheckUpdatesWidget::slot_downloaderError(const QString &msg)
         slot_gettingFilesSize();
     } else if (msg == "Error URL") {
         slot_gettingFilesSize();
+    } else if (msg == "Error while downloading file") {
+        QMessageBox::information(this, tr("Nanomite updater"),
+                                       tr("Error while downloading of updater.ini"));
+        exit(1);
     } else {
         qDebug() << msg;
     }
