@@ -55,6 +55,8 @@ void UCheckUpdatesWidget::checkUpdates()
 {
     qDebug() << __FUNCTION__;
 
+    ui->status->setText("Checking for updating...");
+
     // init connections for communicating with class of downloading updates
     disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
                this,            SLOT(slot_downloadFinished()));
@@ -85,6 +87,8 @@ void UCheckUpdatesWidget::checkUpdates()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::slot_processUpdates()
 {
+    ui->status->setText("Process updater.ini file");
+
     m_currentUpdate = 0;
 
     if (m_updatesModel != 0) {
@@ -176,12 +180,13 @@ void UCheckUpdatesWidget::slot_gettingFilesSize()
             this,               SLOT(slot_getFileSize(uint)));
 
 
-    QModelIndex index = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eURI);
+    QModelIndex uriIndex = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eURI);
+    QModelIndex packageNameIndex = m_updatesModel->index(m_currentUpdate, UUpdatesModel::ePACKAGE);
 
-    QModelIndex indx = m_updatesModel->index(m_currentUpdate, UUpdatesModel::ePACKAGE);
-    qDebug() << m_updatesModel->data(indx, Qt::DisplayRole).toString();
+    qDebug() << m_updatesModel->data(packageNameIndex, Qt::DisplayRole).toString();
+    ui->status->setText(QString("Getting size of file: %1").arg( m_updatesModel->data(packageNameIndex, Qt::DisplayRole).toString()));
 
-    m_downloader->slot_getFileSize(QUrl(m_updatesModel->data(index, Qt::DisplayRole).toString()));
+    m_downloader->slot_getFileSize(QUrl(m_updatesModel->data(uriIndex, Qt::DisplayRole).toString()));
 
     m_currentUpdate++;
 }

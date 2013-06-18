@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>154</width>
-    <height>76</height>
+    <height>83</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="status">
      <property name="text">
       <string>Checking for updates...</string>
      </property>
