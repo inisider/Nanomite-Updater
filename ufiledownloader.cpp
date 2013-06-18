@@ -17,6 +17,9 @@ UFileDownloader::UFileDownloader(QObject *parent) :
 
     connect(this,   SIGNAL(signal_fileSizeredirectTo(QUrl)),
             this,   SLOT(slot_getFileSize(QUrl)));
+
+    connect(&m_manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
+                        SLOT(slot_sslErrors(QNetworkReply*,QList<QSslError>)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +184,15 @@ void UFileDownloader::slot_downloadFileFinished()
 //        m_reply->deleteLater();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UFileDownloader::slot_readFile()
 {
     m_file.write(m_reply->readAll());
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UFileDownloader::slot_sslErrors(QNetworkReply *reply, QList<QSslError> errorList) {
+    qDebug()<<__FUNCTION__;
+
+    reply->ignoreSslErrors(errorList);
 }

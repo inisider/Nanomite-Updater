@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QFile>
+#include <QSslError>
 
 class QProgressBar;
 
@@ -39,6 +40,7 @@ private slots:
     void slot_downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void slot_downloadFileFinished();
     void slot_readFile();
+    void slot_sslErrors(QNetworkReply *reply, QList<QSslError> errorList);
 
 private:
     QNetworkAccessManager   m_manager;
