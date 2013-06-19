@@ -137,12 +137,7 @@ void UCheckUpdatesWidget::slot_processUpdates()
         } else {
             addUpdateToModel(&it.value(), &currentRow);
 
-            if (it.key().contains('/') == true) {
-                QString tmp = it.key();
-                int indx = tmp.indexOf('/');
-                QDir dir(QDir::currentPath());
-                dir.mkdir(tmp.remove(indx, tmp.size() - indx));
-            }
+            createFolders(it.key());
 
             qDebug() << "file does not exist: " << file.fileName(); // add file for updating...
         }
@@ -277,4 +272,31 @@ void UCheckUpdatesWidget::downloadNewUpdater(const QUrl &url)
 
 
     m_downloader->slot_downloadFile(url, "updater_tmp.exe");
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UCheckUpdatesWidget::createFolders(const QString &path)
+{
+    QString tmp = path;
+    QString folderName;
+    int index;
+    QDir currDir(QDir::currentPath());
+
+    QString savePath = currDir.currentPath();
+    QString createdFolder;
+
+    // creating all subfolders
+    while(tmp.contains('/') == true) {
+        index = tmp.indexOf('/');
+        folderName = tmp.mid(0, index);
+        tmp.remove(0, index + 1);
+
+        createdFolder = currDir.currentPath() + '/' + folderName;
+
+        currDir.mkdir(createdFolder);
+        currDir.setCurrent(createdFolder);
+    }
+
+    // set root directory
+    currDir.setCurrent(savePath);
 }

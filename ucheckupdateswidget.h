@@ -27,6 +27,7 @@ private:
     void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
     bool updateUpdater(const SSettingsInfo *info);
     void downloadNewUpdater(const QUrl &url);
+    void createFolders(const QString &path);
 
 signals:
     void signal_downloadFailed(const QString &);
