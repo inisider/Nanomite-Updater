@@ -20,11 +20,23 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    udownloader.cpp
+    usettingsreader.cpp \
+    ucheckupdateswidget.cpp \
+    updateitem.cpp \
+    uupdatesmodel.cpp \
+    uupdatestableview.cpp \
+    ufiledownloader.cpp \
+    uupdatewidget.cpp
 
-HEADERS  += mainwindow.h \
-    settings.h \
-    udownloader.h
+HEADERS  += \
+    usettingsreader.h \
+    ucheckupdateswidget.h \
+    updateitem.h \
+    uupdatesmodel.h \
+    uupdatestableview.h \
+    ufiledownloader.h \
+    uupdatewidget.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    ucheckupdateswidget.ui \
+    uupdatewidget.ui

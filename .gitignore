@@ -20,4 +20,8 @@ Makefile
 .rcc
 .ui
 .obj
-bin
+#bin
+
+Makefile.Debug
+Makefile.Release
+vc100.pdb
