@@ -110,6 +110,12 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     TReadSettings settings = settingsReader.getSettings();
 
+    if (settings.contains("qtNanomite.exe") == true) {
+        if (checkQtNanomiteHash(&settings["qtNanomite.exe"]) == true) {
+            return;
+        }
+    }
+
     if (settings.contains("updater.exe") == true) {
         if (updateUpdater(&settings["updater.exe"]) == true) {
             return;
@@ -219,7 +225,7 @@ void UCheckUpdatesWidget::slot_setupNewUpdater()
     QProcess process;
 
     process.start("updater_tmp.exe", QStringList() << "update");
-    exit(1);
+    exit(2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,6 +256,24 @@ bool UCheckUpdatesWidget::updateUpdater(const SSettingsInfo *info)
 
         if (hash.result().toHex() != info->hash) {
             downloadNewUpdater(info->link);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool UCheckUpdatesWidget::checkQtNanomiteHash(const SSettingsInfo *info)
+{
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    QFile file;
+    file.setFileName("qtNanomite.exe");
+
+    if (file.open(QIODevice::ReadOnly) == true) {
+        hash.addData(file.readAll());
+
+        if (hash.result().toHex() != info->hash) {
             return true;
         }
     }

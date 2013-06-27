@@ -26,6 +26,7 @@ public:
 private:
     void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
     bool updateUpdater(const SSettingsInfo *info);
+    bool checkQtNanomiteHash(const SSettingsInfo *info);
     void downloadNewUpdater(const QUrl &url);
     void createFolders(const QString &path);
 

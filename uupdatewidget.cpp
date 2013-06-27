@@ -1,6 +1,8 @@
 #include "uupdatewidget.h"
 #include "ui_uupdatewidget.h"
 
+#include <QProcess>
+
 #include <QStackedWidget>
 #include <QMessageBox>
 #include <QProgressBar>
@@ -83,6 +85,10 @@ void UUpdateWidget::slot_installUpdates()
 
     QMessageBox::information(this, tr("Nanomite updater"),
                                     tr("The update is completed"));
+
+    QProcess process;
+    process.start("qtNanomite.exe");
+    exit(0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

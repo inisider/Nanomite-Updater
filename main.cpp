@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
 
     UUpdateWidget w;
 
+    bool needStartUpdaterDirectly = false;
+
     if (argc == 2) {
         if (strcmp(argv[1], "update") == 0) {
             QFile::remove("updater.exe");
@@ -18,19 +20,20 @@ int main(int argc, char *argv[])
             QProcess process;
             process.start("updater.exe");
             exit(1);
+        } else if (strcmp(argv[1], "startUpdate")) {
+            needStartUpdaterDirectly = true;
         }
     }
 
-    bool isFileDeleted = false;
     QFile file;
 
     file.setFileName("updater_tmp.exe");
     if (file.exists() == true) {
-        isFileDeleted = true;
+        needStartUpdaterDirectly = true;
         QFile::remove("updater_tmp.exe");
     }
 
-    if (isFileDeleted == true) {
+    if (needStartUpdaterDirectly == true) {
         w.show();
         w.slot_checkUpdates();
     } else {
