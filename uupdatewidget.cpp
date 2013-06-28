@@ -113,7 +113,8 @@ void UUpdateWidget::slot_checkUpdatesFailed(const QString &error)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_closeWidget()
 {
-    close();
+    exit(0);
+//    close();
 }
 
 void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
