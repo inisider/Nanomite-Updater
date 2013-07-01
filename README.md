@@ -1,4 +1,4 @@
 Nanomite-Updater
 ================
 
-Updater for Nonomite debugger
+Updater for Nanomite debugger

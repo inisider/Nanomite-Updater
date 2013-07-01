@@ -25,3 +25,5 @@ Makefile
 Makefile.Debug
 Makefile.Release
 vc100.pdb
+GeneratedFiles/
+TempOutput/
