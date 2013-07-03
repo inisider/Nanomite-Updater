@@ -34,6 +34,7 @@ void UStartUpdater::slot_checkExitCode(int exitCode)
     // 3 - means that this is update of QtNanomite.exe and for install QtNanomite.exe need to close process of QtNanomite.exe.
     if (exitCode == 3) {
         m_process.start(m_fileName, QStringList() << "startUpdate");
+        qDebug() << "gg";
         exit(0);
     }
 }

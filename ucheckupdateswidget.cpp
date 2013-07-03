@@ -112,7 +112,7 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     if (settings.contains("qtNanomite.exe") == true) {
         if (checkQtNanomiteHash(&settings["qtNanomite.exe"]) == true) {
-            return;
+            exit(3);
         }
     }
 

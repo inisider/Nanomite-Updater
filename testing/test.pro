@@ -14,6 +14,11 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+MOC_DIR = .moc
+RCC_DIR = .rcc
+UI_DIR = .ui
+OBJECTS_DIR = .obj
+DESTDIR = bin
 
 SOURCES += main.cpp \
     ustartupdater.cpp
