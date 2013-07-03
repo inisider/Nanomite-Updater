@@ -70,6 +70,7 @@ void UCheckUpdatesWidget::checkUpdates()
 
     QUrl url;
 
+#ifdef _AMD64_
     BOOL is64Bit = FALSE;
     IW64PFP IW64P = (IW64PFP)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "IsWow64Process");
     if(IW64P != NULL)
@@ -77,11 +78,14 @@ void UCheckUpdatesWidget::checkUpdates()
         IW64P(GetCurrentProcess(), &is64Bit);
     }
 
-    if (is64Bit == TRUE) {
+    if (is64Bit != TRUE) {
         url.setUrl(QString(UPDATER_INI_X64));
     } else {
         url.setUrl(QString(UPDATER_INI_X32));
     }
+#else
+	url.setUrl(QString(UPDATER_INI_X32));
+#endif
 
     m_downloader->slot_downloadFile(url);
 }
