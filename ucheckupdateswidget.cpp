@@ -114,12 +114,6 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     TReadSettings settings = settingsReader.getSettings();
 
-    if (settings.contains("qtNanomite.exe") == true) {
-        if (checkQtNanomiteHash(&settings["qtNanomite.exe"]) == true) {
-            exit(3);
-        }
-    }
-
     if (settings.contains("updater.exe") == true) {
         if (updateUpdater(&settings["updater.exe"]) == true) {
             return;

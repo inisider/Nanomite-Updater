@@ -88,7 +88,8 @@ void UUpdateWidget::slot_installUpdates()
 
     QProcess process;
     process.start("qtNanomite.exe");
-    exit(0);
+
+    slot_closeWidget();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,9 +115,9 @@ void UUpdateWidget::slot_checkUpdatesFailed(const QString &error)
 void UUpdateWidget::slot_closeWidget()
 {
     exit(0);
-//    close();
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
 {
     if (model->rowCount() == 0) {
@@ -128,7 +129,11 @@ void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
         m_stackedWidget->setCurrentIndex(0);
         m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
         m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
-        return;
+
+        QProcess process;
+        process.start("qtNanomite.exe");
+
+        slot_closeWidget();
     }
 
     m_updatesTableView->setModel(model);

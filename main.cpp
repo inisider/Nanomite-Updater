@@ -21,8 +21,6 @@ int main(int argc, char *argv[])
             QProcess process;
             process.start("updater.exe");
             exit(1);
-        } else if (strcmp(argv[1], "startUpdate") == 0) {
-            needStartUpdaterDirectly = true;
         }
     }
 

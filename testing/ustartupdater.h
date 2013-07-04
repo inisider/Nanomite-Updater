@@ -15,8 +15,8 @@ public:
 private:
     void init();
 
-private Q_SLOTS:
-    void slot_checkExitCode(int exitCode);
+//private Q_SLOTS:
+//    void slot_checkExitCode(int exitCode);
 
 private:
     QProcess m_process;
