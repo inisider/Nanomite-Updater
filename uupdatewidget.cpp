@@ -86,8 +86,7 @@ void UUpdateWidget::slot_installUpdates()
     QMessageBox::information(this, tr("Nanomite updater"),
                                     tr("The update is completed"));
 
-    QProcess process;
-    process.start("qtNanomite.exe");
+    // here need to start update.exe for install updates
 
     slot_closeWidget();
 }
@@ -129,9 +128,6 @@ void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
         m_stackedWidget->setCurrentIndex(0);
         m_toolBarActions.at(eINSTALL_UPDATES_ACTION)->setEnabled(false);
         m_toolBarActions.at(eCHECK_UPDATES_ACTION)->setEnabled(true);
-
-        QProcess process;
-        process.start("qtNanomite.exe");
 
         slot_closeWidget();
     }

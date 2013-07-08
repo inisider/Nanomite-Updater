@@ -113,14 +113,13 @@ void UCheckUpdatesWidget::slot_processUpdates()
     settingsReader.readSettings("updater.ini");
 
     TReadSettings settings = settingsReader.getSettings();
-
-    if (settings.contains("updater.exe") == true) {
-        if (updateUpdater(&settings["updater.exe"]) == true) {
-            return;
-        }
-    }
-
     TReadSettings::const_iterator it = settings.begin();
+
+    // create folder for updates
+    QDir currDir(QDir::currentPath());
+    QString createdFolder = currDir.currentPath() + "/updates";
+    currDir.mkdir(createdFolder);
+    currDir.setCurrent(createdFolder);
 
     // check if is it new updates
     while (it != settings.end()) {
@@ -135,7 +134,7 @@ void UCheckUpdatesWidget::slot_processUpdates()
             if (hash.result().toHex() != it.value().hash) {
                 addUpdateToModel(&it.value(), &currentRow);
 
-                QFile::remove(file.fileName());
+//                QFile::remove(file.fileName());
                 qDebug() << "need to be update file: " << file.fileName(); // add file for updating
             }
         } else {
