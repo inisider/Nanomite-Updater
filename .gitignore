@@ -27,3 +27,7 @@ Makefile.Release
 vc100.pdb
 GeneratedFiles/
 TempOutput/
+Release/
+Debug/
+ipch/
+
