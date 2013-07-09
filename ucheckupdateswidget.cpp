@@ -117,6 +117,7 @@ void UCheckUpdatesWidget::slot_processUpdates()
 
     // create folder for updates
     QDir currDir(QDir::currentPath());
+    QString savePath = currDir.currentPath();
     QString createdFolder = currDir.currentPath() + "/updates";
     currDir.mkdir(createdFolder);
     currDir.setCurrent(createdFolder);
@@ -126,7 +127,7 @@ void UCheckUpdatesWidget::slot_processUpdates()
         hash.reset();
         file.close();
 
-        file.setFileName(/*QDir::currentPath() + '/' +*/ it.key());
+        file.setFileName(savePath + '/' + it.key());
 
         if (file.open(QIODevice::ReadOnly) == true) {
             hash.addData(file.readAll());
@@ -134,7 +135,6 @@ void UCheckUpdatesWidget::slot_processUpdates()
             if (hash.result().toHex() != it.value().hash) {
                 addUpdateToModel(&it.value(), &currentRow);
 
-//                QFile::remove(file.fileName());
                 qDebug() << "need to be update file: " << file.fileName(); // add file for updating
             }
         } else {
@@ -173,12 +173,9 @@ void UCheckUpdatesWidget::slot_gettingFilesSize()
                this,            SLOT(slot_downloadFinished()));
     disconnect(m_downloader,    SIGNAL(signal_gotFileSize(uint)),
                this,            SLOT(slot_getFileSize(uint)));
-    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
-               this,            SLOT(slot_setupNewUpdater()));
 
     connect(m_downloader,       SIGNAL(signal_gotFileSize(uint)),
             this,               SLOT(slot_getFileSize(uint)));
-
 
     QModelIndex uriIndex = m_updatesModel->index(m_currentUpdate, UUpdatesModel::eURI);
     QModelIndex packageNameIndex = m_updatesModel->index(m_currentUpdate, UUpdatesModel::ePACKAGE);
@@ -217,15 +214,6 @@ void UCheckUpdatesWidget::slot_downloaderError(const QString &msg)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::slot_setupNewUpdater()
-{
-    QProcess process;
-
-    process.start("updater_tmp.exe", QStringList() << "update");
-    exit(2);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UCheckUpdatesWidget::addUpdateToModel(const SSettingsInfo *info, int *currentRow)
 {
     QModelIndex index;
@@ -239,60 +227,6 @@ void UCheckUpdatesWidget::addUpdateToModel(const SSettingsInfo *info, int *curre
     m_updatesModel->setData(index, info->link, Qt::DisplayRole);
 
     (*currentRow)++;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool UCheckUpdatesWidget::updateUpdater(const SSettingsInfo *info)
-{
-    QCryptographicHash hash(QCryptographicHash::Md5);
-    QFile file;
-    file.setFileName("updater.exe");
-
-    if (file.open(QIODevice::ReadOnly) == true) {
-        hash.addData(file.readAll());
-
-        if (hash.result().toHex() != info->hash) {
-            downloadNewUpdater(info->link);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool UCheckUpdatesWidget::checkQtNanomiteHash(const SSettingsInfo *info)
-{
-    QCryptographicHash hash(QCryptographicHash::Md5);
-    QFile file;
-    file.setFileName("qtNanomite.exe");
-
-    if (file.open(QIODevice::ReadOnly) == true) {
-        hash.addData(file.readAll());
-
-        if (hash.result().toHex() != info->hash) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::downloadNewUpdater(const QUrl &url)
-{
-    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
-               this,            SLOT(slot_downloadFinished()));
-    disconnect(m_downloader,    SIGNAL(signal_gotFileSize(uint)),
-               this,            SLOT(slot_getFileSize(uint)));
-    disconnect(m_downloader,    SIGNAL(signal_downloadFileFinished()),
-               this,            SLOT(slot_setupNewUpdater()));
-
-    connect(m_downloader,       SIGNAL(signal_downloadFileFinished()),
-            this,               SLOT(slot_setupNewUpdater()));
-
-
-    m_downloader->slot_downloadFile(url, "updater_tmp.exe");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

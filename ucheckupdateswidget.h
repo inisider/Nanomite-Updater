@@ -25,9 +25,6 @@ public:
 
 private:
     void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
-    bool updateUpdater(const SSettingsInfo *info);
-    bool checkQtNanomiteHash(const SSettingsInfo *info);
-    void downloadNewUpdater(const QUrl &url);
     void createFolders(const QString &path);
 
 signals:
@@ -43,8 +40,6 @@ protected slots:
     void slot_getFileSize(unsigned int size);
 
     void slot_downloaderError(const QString &msg);
-
-    void slot_setupNewUpdater();
 
 private:
     Ui::UCheckUpdatesWidget     *ui;

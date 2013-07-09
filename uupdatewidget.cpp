@@ -12,6 +12,8 @@
 #include "uupdatestableview.h"
 #include "ufiledownloader.h"
 
+#include <QDir>
+
 #include <QDebug>
 
 UUpdateWidget::UUpdateWidget(QWidget *parent) :
@@ -87,6 +89,21 @@ void UUpdateWidget::slot_installUpdates()
                                     tr("The update is completed"));
 
     // here need to start update.exe for install updates
+    QProcess process;
+    QAbstractItemModel *model = m_updatesTableView->model();
+    QStringList paramList;
+    QModelIndex index;
+
+    QDir dir(QDir::current());
+    dir.cdUp();
+    QDir::setCurrent(dir.path());
+
+    for (int i = 0; i < model->rowCount(); i++) {
+        index = model->index(i,  UUpdatesModel::ePACKAGE);
+        paramList << model->data(index).toString();
+    }
+
+    process.start("update.exe", paramList);
 
     slot_closeWidget();
 }
@@ -114,6 +131,7 @@ void UUpdateWidget::slot_checkUpdatesFailed(const QString &error)
 void UUpdateWidget::slot_closeWidget()
 {
     exit(0);
+//    close();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
