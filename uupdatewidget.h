@@ -23,6 +23,9 @@ class UUpdateWidget : public QMainWindow
 public:
     explicit UUpdateWidget(QWidget *parent = 0);
     ~UUpdateWidget();
+
+private:
+    void createFolders(const QString &path);
     
 signals:
     void signal_downloadUpdatesFinished();

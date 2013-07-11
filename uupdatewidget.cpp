@@ -103,7 +103,7 @@ void UUpdateWidget::slot_installUpdates()
         paramList << model->data(index).toString();
     }
 
-    process.start("update.exe", paramList);
+    process.start("updater.exe", paramList);
 
     exit(0);
 }
@@ -130,7 +130,6 @@ void UUpdateWidget::slot_checkUpdatesFailed(const QString &error)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UUpdateWidget::slot_closeWidget()
 {
-//    exit(0);
     close();
 }
 
@@ -149,6 +148,13 @@ void UUpdateWidget::slot_showUpdatesTable(UUpdatesModel *model)
 
         return;
     }
+
+    // create folder for updates
+    QDir currDir(QDir::currentPath());
+    QString createdFolder = currDir.currentPath() + "/updates";
+    currDir.mkdir(createdFolder);
+    currDir.setCurrent(createdFolder);
+    // end of creating folder for updates
 
     m_updatesTableView->setModel(model);
     m_progressBarList.clear();
@@ -200,6 +206,10 @@ void UUpdateWidget::slot_downloadFileFinished()
         m_downloader->setDir("");
     }
 
+    index = model->index(m_currentDownloadFile, UUpdatesModel::ePACKAGE);
+
+    createFolders(index.data().toString());
+
     index = model->index(m_currentDownloadFile, UUpdatesModel::eURI);
     m_downloader->slot_downloadFile(model->data(index, Qt::DisplayRole).toUrl());
 }
@@ -212,5 +222,32 @@ void UUpdateWidget::slot_error(const QString &error)
     if (error == "Error URL" || error == "Error while downloading file") {
         slot_downloadFileFinished();
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UUpdateWidget::createFolders(const QString &path)
+{
+    QString tmp = path;
+    QString folderName;
+    int index;
+    QDir currDir(QDir::currentPath());
+
+    QString savePath = currDir.currentPath();
+    QString createdFolder;
+
+    // creating all subfolders
+    while(tmp.contains('/') == true) {
+        index = tmp.indexOf('/');
+        folderName = tmp.mid(0, index);
+        tmp.remove(0, index + 1);
+
+        createdFolder = currDir.currentPath() + '/' + folderName;
+
+        currDir.mkdir(createdFolder);
+        currDir.setCurrent(createdFolder);
+    }
+
+    // set root directory
+    currDir.setCurrent(savePath);
 }
 
