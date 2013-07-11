@@ -41,7 +41,6 @@ public:
 
 private:
     void addUpdateToModel(const SSettingsInfo *info, int *currentRow);
-    void createFolders(const QString &path);
 
 signals:
     void signal_downloadFailed(const QString &);

@@ -129,19 +129,12 @@ void UCheckUpdatesWidget::slot_processUpdates()
     TReadSettings settings = settingsReader.getSettings();
     TReadSettings::const_iterator it = settings.begin();
 
-    // create folder for updates
-    QDir currDir(QDir::currentPath());
-    QString savePath = currDir.currentPath();
-    QString createdFolder = currDir.currentPath() + "/updates";
-    currDir.mkdir(createdFolder);
-    currDir.setCurrent(createdFolder);
-
     // check if is it new updates
     while (it != settings.end()) {
         hash.reset();
         file.close();
 
-        file.setFileName(savePath + '/' + it.key());
+        file.setFileName(it.key());
 
         if (file.open(QIODevice::ReadOnly) == true) {
             hash.addData(file.readAll());
@@ -153,8 +146,6 @@ void UCheckUpdatesWidget::slot_processUpdates()
             }
         } else {
             addUpdateToModel(&it.value(), &currentRow);
-
-            createFolders(it.key());
 
             qDebug() << "file does not exist: " << file.fileName(); // add file for updating...
         }
@@ -241,31 +232,4 @@ void UCheckUpdatesWidget::addUpdateToModel(const SSettingsInfo *info, int *curre
     m_updatesModel->setData(index, info->link, Qt::DisplayRole);
 
     (*currentRow)++;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UCheckUpdatesWidget::createFolders(const QString &path)
-{
-    QString tmp = path;
-    QString folderName;
-    int index;
-    QDir currDir(QDir::currentPath());
-
-    QString savePath = currDir.currentPath();
-    QString createdFolder;
-
-    // creating all subfolders
-    while(tmp.contains('/') == true) {
-        index = tmp.indexOf('/');
-        folderName = tmp.mid(0, index);
-        tmp.remove(0, index + 1);
-
-        createdFolder = currDir.currentPath() + '/' + folderName;
-
-        currDir.mkdir(createdFolder);
-        currDir.setCurrent(createdFolder);
-    }
-
-    // set root directory
-    currDir.setCurrent(savePath);
 }
