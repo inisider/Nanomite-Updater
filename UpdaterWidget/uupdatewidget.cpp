@@ -37,6 +37,7 @@ UUpdateWidget::UUpdateWidget(QWidget *parent) :
     ui(new Ui::UUpdateWidget)
 {
     ui->setupUi(this);
+	this->setAttribute(Qt::WA_DeleteOnClose,true);
 
     setFixedSize(size());
 
