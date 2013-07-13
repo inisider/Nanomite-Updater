@@ -30,4 +30,8 @@ TempOutput/
 Release/
 Debug/
 ipch/
+bin/
+updater.sdf
+updater.sln
+updater.suo
 
